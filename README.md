@@ -22,7 +22,7 @@ pkg install zlib -y
 pkg install git
 ```
 ```shell
- pip install aiofiles rich aiohttp pytz bs4
+ pip install aiofiles rich aiohttp pytz bs4 requests colorama psutil
 ```
 
 # Add Go to PATH
