@@ -21,9 +21,6 @@ pkg install zlib -y
 ```shell
 pkg install git
 ```
-```shell
- pip install aiofiles rich aiohttp pytz bs4 requests colorama psutil
-```
 
 # Add Go to PATH
 
@@ -53,9 +50,13 @@ git clone https://github.com/SirYadav1/AdwanceSNI-2.0
 ```shell
 cd AdwanceSNI-2.0
 ```
-
+# Install requirements
 ```shell
-python main.py
+bash install.sh
+```
+# Run program by bash 
+```shell
+bash run.sh
 ```
 
 ## Author Information
@@ -65,4 +66,4 @@ python main.py
 **Design by**: Amith<br>
 **Contact**: siryadav025@gamil.com<br>
 **Telegram**: [@SirYadav](https://t.me/SirYadav)  
-**Version**: 2.0
+**Version**: 2.2
