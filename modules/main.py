@@ -62,7 +62,7 @@ def show_banner():
     ║ Coded by    : YADAV              ║
     ║ Design by   : AMITH              ║
     ║ Telegram    : @SirYadav          ║
-    ║ Version     : 2.0 (Test verison) ║
+    ║ Version     : 2.2                ║
     ╚══════════════════════════════════╝
     """
     color = random.choice(COLORS)
