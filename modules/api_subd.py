@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
@@ -11,7 +11,7 @@ import os
 console = Console()
 file_write_lock = Lock()
 session = requests.Session()
-DEFAULT_TIMEOUT = 10
+DEFAULT_TIMEOUT = 20
 
 # Function to clear the terminal and display dynamic ASCII banner
 def show_banner():
@@ -25,7 +25,6 @@ def show_banner():
 
     # ASCII Art Banner
     banner = """
-
  ╔═══╦╗─╔╦══╗╔═══╗──────╔╗╔╗──╔═══╦═══╦══╗
  ║╔═╗║║─║║╔╗║╚╗╔╗║─────╔╝╚╣║──║╔═╗║╔═╗╠╣╠╝
  ║╚══╣║─║║╚╝╚╗║║║║╔╗╔╗╔╬╗╔╣╚═╗║║─║║╚═╝║║║
@@ -33,7 +32,6 @@ def show_banner():
  ║╚═╝║╚═╝║╚═╝╠╝╚╝║╚╗╔╗╔╣║╚╣║║║║╔═╗║║──╔╣╠╗
  ╚═══╩═══╩═══╩═══╝─╚╝╚╝╚╩═╩╝╚╝╚╝─╚╩╝──╚══╝
     """
-    # Center-align banner
     centered_banner = "\n".join(line.center(terminal_width) for line in banner.splitlines())
     console.print(f"[bold cyan]{centered_banner}[/bold cyan]")
 
@@ -44,10 +42,10 @@ def validate_domain(domain):
     )
     return bool(domain_pattern.match(domain))
 
-# Clean wildcard subdomains (e.g. *.example.com)
+# Clean wildcard subdomains (e.g., *.example.com)
 def clean_subdomain(subdomain):
     if subdomain.startswith("*."):
-        return subdomain[2:]  # Remove wildcard from subdomain
+        return subdomain[2:]  # Remove wildcard
     return subdomain
 
 # Fetch subdomains from CRT.sh
@@ -108,14 +106,6 @@ def urlscan_subdomains(domain):
                 subdomains.add(page_url)
     return subdomains
 
-# Fetch subdomains using C99 Subdomain Finder
-def c99_subdomains(domain):
-    subdomains = set()
-    response = session.get(f"https://subdomainfinder.c99.nl/scans/{datetime.now().strftime('%Y-%m-%d')}/{domain}", timeout=DEFAULT_TIMEOUT)
-    if response.status_code == 200:
-        subdomains.update(response.text.splitlines())
-    return subdomains
-
 # Fetch subdomains using provided function
 def fetch_subdomains(source_func, domain):
     try:
@@ -131,7 +121,7 @@ def process_domain(domain, sources, output_file, progress, task_id):
 
     for source in sources:
         fetched_subdomains = fetch_subdomains(source, domain)
-        cleaned_subdomains = {clean_subdomain(sub) for sub in fetched_subdomains}
+        cleaned_subdomains = {clean_subdomain(sub) for sub in fetched_subdomains if validate_domain(clean_subdomain(sub))}
         subdomains.update(cleaned_subdomains)
         progress.update(task_id, advance=1)
 
@@ -153,8 +143,7 @@ def find_subdomains():
 
     sources = [
         crtsh_subdomains, hackertarget_subdomains, rapiddns_subdomains,
-        anubisdb_subdomains, alienvault_subdomains, urlscan_subdomains,
-        c99_subdomains
+        anubisdb_subdomains, alienvault_subdomains, urlscan_subdomains
     ]
 
     console.print("[bold yellow][1] Single domain[/bold yellow]")
@@ -198,7 +187,7 @@ def find_subdomains():
         return
 
     # Define output file path
-    output_directory = "/storage/emulated/0/"
+    output_directory = "/storage/emulated/0/"  # Use this directory
     output_file = os.path.join(output_directory, f"{output_file_name}.txt")
 
     console.print(f"[bold yellow]Starting subdomain finding...[/bold yellow]")
