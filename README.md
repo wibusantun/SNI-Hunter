@@ -1,6 +1,13 @@
 ## AdwanceSNI-2.0
 AdwanceSNI 2.0 is the enhanced version of the original AdwanceSNI program, designed to provide a comprehensive suite for network scanning and subdomain discovery. It retains the core functionalities of finding subdomains and scanning hosts while introducing new tools for IP extraction, IP generation, and a lite scanner.
 
+
+<strong><em>AdwanceSNI 2.0 is built using Ayan Rajput's prebuilt tools – bughunter-go, normal scanner, and subdomain discovery (API). These tools handle subdomain discovery and host scanning, forming the core of the project.</em></strong>
+
+<strong><em>Credit goes to Ayan Rajput for his valuable contributions🤝.</em></strong>
+
+
+
 ## Installation commands 🔗
 ```shell
 termux-setup-storage
@@ -61,7 +68,8 @@ bash run.sh
 
 ## Author Information
 
-**Author**: YADAV  
+**Author**: YADAV<br>
+**Tools**: bughunter-go, Normal Scanner, Subdomain API – <b style="color:red;">by Ayan Rajput</b>  
 **Coded by**: YADAV  
 **Design by**: Amith<br>
 **Contact**: siryadav025@gamil.com<br>
