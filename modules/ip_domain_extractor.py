@@ -3,121 +3,88 @@ import re
 from colorama import Fore, Style, init
 import time
 
-# Initialize colorama for colored text in the terminal
 init(autoreset=True)
 
-# ANSI escape codes for additional formatting
-ORANGE = '\033[38;5;214m'
-BOLD = "\033[1m" 
-SKY_BLUE = "\033[94m" 
-RESET = "\033[0m"  # Reset text formatting
+BOLD = "\033[1m"
+SKY_BLUE = "\033[94m"
+RESET = "\033[0m"
 
-# Helper function for user input
-def get_input(prompt):
-    return input(prompt)
+def solicit_input(message):
+    return input(f"{Fore.GREEN + Style.BRIGHT}{message}{Style.RESET_ALL}").strip()
 
-# Main function to clean text file and extract domains and IPs
-def txt_cleaner(file_path, output_file):
+def process_text(file_location, destination):
     try:
-        with open(file_path, 'r') as infile:
-            file_contents = infile.readlines()
-    except FileNotFoundError:
-        print(Fore.RED + "❌ The specified input file does not exist. Please check the filename and try again.")
+        with open(file_location, 'r') as source:
+            lines = source.readlines()
+    except (FileNotFoundError, PermissionError) as error:
+        print(Fore.RED + f"Access Issue: {error}")
         return
-    except PermissionError:
-        print(Fore.RED + "❌ Permission denied. Check file permissions and try again.")
-        return
-    except Exception as ex:
-        print(Fore.RED + f"❌ An error occurred while reading the file: {ex}")
+    except Exception as error:
+        print(Fore.RED + f"Unexpected Error: {error}")
         return
 
-    total_lines = len(file_contents)
-    domain_pattern = re.compile(r'\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}\b')
-    ip_pattern = re.compile(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b')
+    total = len(lines)
+    domain_regex = re.compile(r'\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b')
+    
+    # Updated IP regex (no capturing groups)
+    ip_regex = re.compile(
+        r'\b(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.'
+        r'(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.'
+        r'(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.'
+        r'(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\b'
+    )
 
-    domains = set()
-    ips = set()
+    domain_set, ip_set = set(), set()
 
-    for i, line in enumerate(file_contents):
-        domains.update(domain_pattern.findall(line))
-        ips.update(ip_pattern.findall(line))
-        # Progress bar update
-        print(f"[{'*' * ((i + 1) * 20 // total_lines)}{' ' * (20 - (i + 1) * 20 // total_lines)}] {((i + 1) * 100) // total_lines}% ", end='\r')
+    for index, content in enumerate(lines):
+        domain_set.update(domain_regex.findall(content))
+        ip_set.update(ip_regex.findall(content))  # Now returns plain strings
+        progress_bar(index + 1, total)
 
-    if not domains and not ips:
-        print(Fore.YELLOW + "⚠️ No domains or IP addresses were found in the file.")
+    if not (domain_set or ip_set):
+        print(Fore.YELLOW + "No discernible data identified.")
         return
+
+    save_location = '/storage/emulated/0/'
+    final_path = os.path.join(save_location, destination)
 
     try:
-        with open(output_file, 'w') as outfile:
-            for domain in sorted(domains):
-                outfile.write(domain + "\n")
-            outfile.write("\n" * 4)
-            for ip in sorted(ips):
-                outfile.write(ip + "\n")
-    except PermissionError:
-        print(Fore.RED + "❌ Permission denied while writing to the output file.")
-        return
-    except Exception as ex:
-        print(Fore.RED + f"❌ An error occurred while writing to the file: {ex}")
+        with open(final_path, 'w') as target:
+            target.write('\n'.join(sorted(domain_set)) + "\n\n\n\n")
+            target.write('\n'.join(sorted(ip_set)) + "\n")  # Tuple issue resolved
+    except Exception as error:
+        print(Fore.RED + f"Write Error: {error}")
         return
 
-    print(Fore.GREEN + Style.BRIGHT + f"√ Domains and IP addresses have been saved to '{output_file}'.")
-    print("\n")
+    print(Fore.GREEN + f"Results stored at: {final_path}\n")
 
-# Function to create a banner
-def create_banner(text):
-    terminal_width = os.get_terminal_size().columns
-    text_length = len(text)
-    if text_length > terminal_width - 4:
-        text = text[:terminal_width - 4]
+def progress_bar(current, total):
+    bar_length = 20
+    filled = int(bar_length * current // total)
+    print(f"[{'*' * filled}{' ' * (bar_length - filled)}] {int((current / total) * 100)}%", end='\r')
 
-    padding = (terminal_width - text_length - 2) // 2
-    banner = f"{'=' * terminal_width}\n"
-    banner += f"|{' ' * padding}{text}{' ' * (padding - 1)}|\n"
-    banner += f"{'=' * terminal_width}\n"
-    return banner
+def render_banner(text):
+    try:
+        width = os.get_terminal_size().columns
+    except OSError:
+        width = 80
+    text = text[:width - 4] if len(text) > width - 4 else text
+    padding = (width - len(text) - 2) // 2
+    return f"{'=' * width}\n|{' ' * padding}{text}{' ' * (padding - 1)}|\n{'=' * width}\n"
 
-# Main function
-def main():
-    # Print banner
-    banner_text = "IP | Domain Extractor"
-    print(Fore.CYAN + Style.BRIGHT + create_banner(banner_text) + Style.RESET_ALL)
-
-    # Get file path from user
-    print(Fore.GREEN + Style.BRIGHT + "Enter File Path: " + Style.RESET_ALL, end="")
-    file_path = get_input("").strip()
-
-    # Validate file existence
-    if not os.path.exists(file_path):
-        print(Fore.RED + "❌ The specified file does not exist. Please check the path and try again." + Style.RESET_ALL)
-        return
-
-    # Validate file format
-    if not file_path.lower().endswith('.txt'):
-        print(Fore.RED + "❌ Invalid file format. Ensure it is a .txt file." + Style.RESET_ALL)
+def orchestrate():
+    print(Fore.CYAN + Style.BRIGHT + render_banner("IP and Domain Analyzer") + Style.RESET_ALL)
+    file_location = solicit_input("Specify path to the text file: ")
+    
+    if not os.path.exists(file_location) or not file_location.lower().endswith('.txt'):
+        print(Fore.RED + "Invalid or non-existent file. Ensure path correctness and format compliance.")
         return
     
-    # Get output file name from user
-    print(Fore.GREEN + Style.BRIGHT + "Enter Output File Name: " + Style.RESET_ALL, end="")
-    output_file = get_input("").strip()
+    output_name = solicit_input("Define the output file name (default: result.txt): ")
+    output_name = output_name if output_name.endswith('.txt') else f"{output_name}.txt"
 
-    # Ensure .txt extension for output file
-    if not output_file.endswith('.txt'):
-        output_file += '.txt'
+    process_text(file_location, output_name)
+    solicit_input("Press Enter to continue...")
 
-    # Simulate progress bar before starting the cleaning process
-    for i in range(21):
-        time.sleep(0.1)
-        print(f"[{'*' * i}{' ' * (20 - i)}]{i * 5}% ", end='\r')
-    print("[********************]100%")
-
-    # Call the text cleaner function
-    txt_cleaner(file_path, output_file)
-
-    # Return to the main menu
-    input(f"{BOLD}{SKY_BLUE}\nPress Enter to go to main menu...{RESET}")
-
-# Entry point of the script
 if __name__ == "__main__":
-    main()
+    orchestrate()
