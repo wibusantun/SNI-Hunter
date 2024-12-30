@@ -17,7 +17,7 @@ sleep 1
 chmod +x run.sh
 
 # List of required modules
-REQUIRED_MODULES=("requests" "beautifulsoup4" "rich" "colorama" "aiohttp" "aiofiles" "psutil" "pytz")
+REQUIRED_MODULES=("requests" "beautifulsoup4" "rich" "colorama" "tqdm" "aiohttp" "aiofiles" "psutil" "pytz")
 
 
 check_and_install_modules() {
