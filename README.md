@@ -55,7 +55,7 @@ git clone https://github.com/wibusantun/SNI-Hunter
 ## Usage 📌
  
 ```shell
-cd AdwanceSNI-2.0
+cd SNI-Hunter
 ```
 # Install requirements
 ```shell
