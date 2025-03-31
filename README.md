@@ -49,7 +49,7 @@ go install -v github.com/Ayanrajpoot10/bughunter-go@v1.0.2
 # Clone the repository
 
  ```shell 
-git clone https://github.com/SirYadav1/AdwanceSNI-2.0
+git clone https://github.com/wibusantun/SNI-Hunter
 ```
 
 ## Usage 📌
